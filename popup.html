@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>CORS-MV</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff; --fg: #1b1b1f; --muted: #64646e;
+      --line: #e2e2e8; --card: #f7f7fa;
+      --accent: #2f6fed; --danger: #c0392b; --ok: #1a7f47;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#1c1c20; --fg:#ececf0; --muted:#9a9aa6; --line:#33333c; --card:#26262c; }
+    }
+    * { box-sizing: border-box; }
+    body {
+      width: 340px; margin: 0; padding: 14px;
+      background: var(--bg); color: var(--fg);
+      font: 13px/1.45 system-ui, "Segoe UI", sans-serif;
+    }
+    h1 { font-size: 14px; margin: 0 0 2px; }
+    .sub { color: var(--muted); font-size: 11.5px; margin: 0 0 12px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+    .card h2 { font-size: 12px; margin: 0 0 6px; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); }
+    .slot { font-weight: 600; word-break: break-word; }
+    .slot.empty { font-weight: 400; color: var(--muted); font-style: italic; }
+    .host { color: var(--muted); font-size: 11px; word-break: break-all; }
+    .row { display: flex; gap: 6px; margin-top: 8px; }
+    button {
+      flex: 1; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line);
+      background: var(--bg); color: var(--fg); font: inherit; cursor: pointer;
+    }
+    button:hover:not(:disabled) { border-color: var(--accent); }
+    button:disabled { opacity: .45; cursor: default; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+    button.stop { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 600; }
+    button.link { flex: 0 0 auto; border: none; background: none; color: var(--muted); padding: 6px 4px; }
+    label.check { display: flex; align-items: center; gap: 7px; margin: 2px 0 8px; }
+    .slider { display: grid; grid-template-columns: 68px 1fr 34px; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .slider span:first-child { color: var(--muted); font-size: 11.5px; }
+    .slider output { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 11.5px; }
+    input[type=range] { width: 100%; accent-color: var(--accent); }
+    #status { margin-top: 10px; padding: 8px; border-radius: 6px; font-size: 11.5px; border: 1px solid var(--line); }
+    #status.idle { color: var(--muted); }
+    #status.live { color: var(--ok); border-color: var(--ok); }
+    #status.err  { color: var(--danger); border-color: var(--danger); }
+    .hint { color: var(--muted); font-size: 11px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>CORS-MV</h1>
+  <p class="sub">Each meeting hears the other one through a virtual microphone.</p>
+
+  <div class="card">
+    <h2>Side A</h2>
+    <div class="slot empty" id="a-title">not assigned</div>
+    <div class="host" id="a-host"></div>
+    <div class="row">
+      <button id="a-assign">Assign this tab</button>
+      <button class="link" id="a-clear" title="Clear">&times;</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Side B</h2>
+    <div class="slot empty" id="b-title">not assigned</div>
+    <div class="host" id="b-host"></div>
+    <div class="row">
+      <button id="b-assign">Assign this tab</button>
+      <button class="link" id="b-clear" title="Clear">&times;</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Mix</h2>
+    <label class="check">
+      <input type="checkbox" id="include-mic" />
+      Also send my real microphone to both
+    </label>
+    <div class="slider">
+      <span>My mic</span>
+      <input type="range" id="mic-gain" min="0" max="200" step="5" />
+      <output id="mic-gain-out">100%</output>
+    </div>
+    <div class="slider">
+      <span>Bridged</span>
+      <input type="range" id="remote-gain" min="0" max="200" step="5" />
+      <output id="remote-gain-out">100%</output>
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="primary" id="toggle">Start bridge</button>
+  </div>
+
+  <div id="status" class="idle">Idle.</div>
+  <p class="hint">
+    Assign each tab from the tab itself (that is what grants capture access).
+    If a tab was already open before installing the extension, reload it once.
+    Use headphones &mdash; open speakers will feed both meetings back into your mic.
+  </p>
+
+  <script src="popup.js"></script>
+</body>
+</html>
