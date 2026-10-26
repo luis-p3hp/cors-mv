@@ -1,8 +1,9 @@
 # CORS-MV
 
-A Chrome MV3 extension that patches two live meetings together: what the Google Meet
-tab plays becomes the microphone of the Microsoft Teams tab, and what the Teams tab
-plays becomes the microphone of the Meet tab. Both directions run at once.
+A Chrome MV3 extension that patches two live meetings together: what one meeting tab
+plays becomes the microphone of the other, in both directions at once. Works between any
+two supported browser meeting tabs — Google Meet, Microsoft Teams, and the Zoom **web**
+client — in any combination (Meet↔Teams, Meet↔Zoom, Teams↔Zoom, even Zoom↔Zoom).
 
 ## How it works
 
@@ -65,9 +66,16 @@ If the real microphone is denied or missing, the bridge audio alone still goes o
 
 - **Wear headphones.** On open speakers your real mic picks up both meetings and feeds
   them back in, on top of the bridged copy.
-- Web clients only — `teams.microsoft.com`, `teams.live.com`, `teams.cloud.microsoft`,
-  `meet.google.com`. The Teams *desktop app* is not a browser tab and cannot be bridged;
-  for that you need an OS-level virtual audio device (VB-Cable, VoiceMeeter).
+- **Browser tabs only** — `meet.google.com`, `teams.microsoft.com`, `teams.live.com`,
+  `teams.cloud.microsoft`, `zoom.us`, `zoom.com`. The Teams and Zoom *desktop apps* are
+  not browser tabs and cannot be bridged; for those you need an OS-level virtual audio
+  device (VB-Cable, VoiceMeeter). To add another site, add its host pattern to both
+  `host_permissions` and *both* `content_scripts[].matches` in `manifest.json`, then
+  reload the extension and the tab.
+- **Zoom needs the web client.** A Zoom invite link launches the desktop app by default.
+  On the launch page choose **Join from your browser** so the meeting runs at a
+  `.../wc/<id>/join` URL. Also click **Join Audio by Computer** — Zoom does not request a
+  microphone until you do, so there is nothing to intercept before that.
 - Only audio is bridged. Video, screen share, and chat are untouched.
 - Latency is roughly one WebRTC hop over loopback — tens of milliseconds.
 - The bridge stops automatically if either assigned tab is closed.
@@ -87,4 +95,5 @@ console via `chrome://extensions` → *Inspect views: offscreen.html*.
 | `Cannot capture side A…` | `activeTab` was lost (tab reloaded). Re-assign that tab. |
 | Meeting still uses the real mic | Tab was loaded before the extension. Reload it. |
 | No `[CORS-MV]` logs at all | URL is outside `matches` in `manifest.json` — add it there. |
+| Zoom unaffected by the bridge | Meeting opened in the desktop app, not the web client. |
 | Bridge starts but is silent | The far side is muted, or *Bridged* level is at 0%. |
